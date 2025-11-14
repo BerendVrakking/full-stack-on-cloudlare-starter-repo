@@ -12,6 +12,8 @@ import {
   LINK_LIST,
 } from "./dummy-data";
 
+import { createLink } from "@repo/data-ops/queries/links";
+
 export const linksTrpcRoutes = t.router({
   linkList: t.procedure
     .input(
@@ -22,8 +24,13 @@ export const linksTrpcRoutes = t.router({
     .query(async ({}) => {
       return LINK_LIST;
     }),
-  createLink: t.procedure.input(createLinkSchema).mutation(async ({}) => {
-    return "random-id";
+
+  createLink: t.procedure.input(createLinkSchema).mutation(async ({ctx, input}) => {
+    const linkId = await createLink({
+      accountId: ctx.userInfo.userId,
+      ...input,
+    });
+    return linkId;
   }),
   updateLinkName: t.procedure
     .input(
