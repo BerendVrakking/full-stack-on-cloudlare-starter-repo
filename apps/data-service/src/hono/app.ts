@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { cloudflareInfoSchema } from "@repo/data-ops/zod-schema/links";
-import { getLink } from "@repo/data-ops/queries/links";
 import { getDestinationForCountry, getRoutingDestination } from "../helpers/route-ops";
 
 export const app = new Hono<{ Bindings: Env }>();
