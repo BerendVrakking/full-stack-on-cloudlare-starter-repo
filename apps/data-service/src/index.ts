@@ -1,7 +1,16 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
+import { app } from './hono/app';
+import { initDatabase } from '@repo/data-ops/database';
 
 export default class DataService extends WorkerEntrypoint<Env> {
-	fetch(request: Request) {
-		return new Response('Hello World!');
+
+	constructor(ctx: ExecutionContext, env: Env) {
+		super(ctx, env);
+		initDatabase(env.DB);
 	}
+	
+	fetch(request: Request) {		
+		return app.fetch(request, this.env, this.ctx);
+	}
+
 }
