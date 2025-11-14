@@ -38,7 +38,7 @@ app.get("/:id", async (c) => {
 
     // The message is sent to the queue asynchronously after responding to the client,
     // ensuring the redirect happens immediately and queue processing does not block the request.
-    // This is managed using waitUntil to extend the worker's lifetime for background tasks.
+    // This is managed using waitUntil to extend the worker's lifetime for background tasks. - producer
     c.executionCtx.waitUntil(
         c.env.QUEUE.send(queueMessage)
       )
