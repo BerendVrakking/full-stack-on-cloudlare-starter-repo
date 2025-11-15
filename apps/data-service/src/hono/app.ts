@@ -5,21 +5,6 @@ import { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
 
 export const app = new Hono<{ Bindings: Env }>();
 
-// Durable Object Instance
-app.get("/do/:name", async (c) => {
-  const { name } = c.req.param();
-  const doId = c.env.EVALUATION_SCHEDULER.idFromName(name);
-  const stub = c.env.EVALUATION_SCHEDULER.get(doId);
-
-  await stub.increment();
-
-  const count = await stub.getCount();
-
-  return c.json({
-    count
-    })
-});
-
 //c = context in Hono
 app.get("/:id", async (c) => {
 

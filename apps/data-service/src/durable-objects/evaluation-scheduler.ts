@@ -1,21 +1,51 @@
 import { DurableObject } from 'cloudflare:workers';
+import moment from 'moment';
 
-export class EvaluationScheduler extends DurableObject{
-    count: number = 0;
+interface ClickData {
+    accountId: string;
+    linkId: string;
+    destinationUrl: string;
+    destinationCountryCode: string;
+}
+
+export class EvaluationScheduler extends DurableObject<Env>{
+    clickData: ClickData | undefined;
 
     constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
+
         ctx.blockConcurrencyWhile(async () => {
-            this.count = await ctx.storage.get('count') || this.count;
+            this.clickData = await ctx.storage.get<ClickData>('clickData') || undefined;
         });
     }
 
-    async increment(){
-        this.count++;
-        await this.ctx.storage.put('count', this.count);
-    }
+    async CollectLinkClick(accountId: string, linkId: string, destinationUrl: string, destinationCountryCode: string) {
+        this.clickData = {
+            accountId: accountId,
+            linkId: linkId,
+            destinationUrl: destinationUrl,
+            destinationCountryCode: destinationCountryCode,
+        };
 
-    async getCount(){
-        return this.count;
+        await this.ctx.storage.put('clickData', this.clickData);
+        const alarm = await this.ctx.storage.getAlarm();
+        if (!alarm) {
+            const tenSeconds = moment().add(10, 'seconds').valueOf();
+            await this.ctx.storage.setAlarm(tenSeconds);
+        }
+    }
+    async alarm() {
+        console.log("Evaluation scheduler alarm triggered");
+        const clickData = this.clickData;
+        if (!clickData) throw new Error("Click Data not set")
+
+        await this.env.DESTINATION_EVALUATION_WORKFLOW.create({
+            params: {
+                linkId: clickData.linkId,
+                destinationUrl: clickData.destinationUrl,
+                accountId: clickData.accountId,
+                destinationCountryCode: clickData.destinationCountryCode,
+            }
+        });
     }
 }
