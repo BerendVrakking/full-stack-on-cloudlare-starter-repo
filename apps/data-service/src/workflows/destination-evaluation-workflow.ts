@@ -4,8 +4,6 @@ import { aiDestinationChecker } from '@/helpers/ai-destination-checker';
 import { addEvaluation } from '@repo/data-ops/queries/evaluations';
 import { initDatabase } from '@repo/data-ops/database';
 
-
-
 export class DestinationEvaluationWorkflow extends WorkflowEntrypoint<Env, DestinationStatusEvaluationParams> {
     async run(event: Readonly<WorkflowEvent<DestinationStatusEvaluationParams>>, step: WorkflowStep) {
         initDatabase(this.env.DB);
@@ -33,5 +31,15 @@ export class DestinationEvaluationWorkflow extends WorkflowEntrypoint<Env, Desti
         });
         console.log("AI Status:", aiStatus);
         console.log("Evaluation ID:", evaluationId);
+
+        await step.do("Backup destination HTML in R2", async () => {
+            const accountId = event.payload.accountId;
+            const r2PathHtml = `evaluations/${accountId}/html/${evaluationId}`;
+            const r2PathBodyText = `evaluations/${accountId}/body-text/${evaluationId}`;
+
+            await this.env.BUCKET.put(r2PathHtml, collectedData.html);
+            await this.env.BUCKET.put(r2PathBodyText, collectedData.bodyText);
+            
+        });
     }
 }
