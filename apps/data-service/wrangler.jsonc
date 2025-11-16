@@ -81,6 +81,5 @@
 	{
 		"tag": "v2",
 		"new_sqlite_classes": ["LinkClickTracker"]
-	}
-	]
+	}]
 }

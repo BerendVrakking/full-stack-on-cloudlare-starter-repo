@@ -15,8 +15,8 @@ export const evaluationsTrpcRoutes = t.router({
           createdBefore: z.string().optional(),
         })
         .optional(),
-    )
-    .query(async ({ctx}) => {
+    )//ctx
+    .query(async ({}) => {
       const evaluations = await getEvaluations("test");
 
       const oldestCreatedAt =
