@@ -30,6 +30,20 @@
           "remote": true
         }
       ]
+    },
+    "production": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_id": "aedfe532-b665-4bcb-8485-78df5582a15d",
+        }
+      ],
+      "services": [
+        {
+          "binding": "BACKEND_SERVICE",
+          "service": "data-service-production",
+        }
+      ]
     }
   }
 }
